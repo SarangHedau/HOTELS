@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Django Hotels</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.3/nouislider.css"
+        integrity="sha512-XXtRBFtk/QfR8GEWwQPYjrQBHQwjidXg0wo8HJi9YOaFycWqd2uWkjJoAyx8Mb/+H8uhvmf70EAIxDnQxrwrvw=="
+        crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.3/nouislider.min.js"
+        integrity="sha512-EnXkkBUGl2gBm/EIZEgwWpQNavsnBbeMtjklwAa7jLj60mJk932aqzXFmdPKCG6ge/i8iOCK0Uwl1Qp+S0zowg=="
+        crossorigin="anonymous"></script>
+    <style>
+        body{
+            background-image: url('https://images.unsplash.com/photo-1582738411706-bfc8e691d1c2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8bGlnaHQlMjB3aGl0ZSUyMGlhbWdlfGVufDB8fDB8fHww&auto=format&fit=crop&w=600&q=60');
+            }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-wrapper m5">
+            <a href="#" class="brand-logo center">Hotels</a>
+
+        </div>
+    </nav>
+    <div class="container m4" style="margin-top:50px">
+        <div class="row">
+            <div class="col m4">
+                <div class="input-field col s12">
+                    <select multiple onchange="getHotels()" id="amenities">
+                        <option value="" disabled selected>Choose your option</option>
+                        {% for amenitie in amenities %}
+                        <option value="{{amenitie.id}}">{{amenitie.name}}</option>
+
+                        {% endfor %}
+                    </select>
+                    <label>Select Amenities</label>
+                </div>
+            </div>
+            <div class="col m4">
+                <label>Hotel Price</label>
+
+                <p class="range-field">
+                    <input type="range" onchange="getHotels()" id="hotel_price" min="500" max="10000" value="5000" />
+                </p>
+            </div>
+
+
+        </div>
+    </div>
+    <div class="container">
+        <div class="row m5 p5" id="show_hotels_here">
+
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"
+        integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        var show_hotels_here = document.getElementById('show_hotels_here')
+        $(document).ready(function () {
+            $('select').formSelect();
+        });
+
+        function getHotels() {
+            var price = document.getElementById('hotel_price')
+            var instance = M.FormSelect.getInstance(document.getElementById('amenities'));
+            var html = ''
+            amenities =  ''
+            if(instance){
+             amenities = (instance.getSelectedValues())
+            }
+
+            fetch(`/api/hotels?amenities=${amenities}&hotel_price=${hotel_price.value}`)
+            .then(result => result.json())
+            .then(response => {
+
+                for (var i = 0; i < response.length; i++) {
+                    html +=`
+                    <div class="col s3">
+                        <div class="card">
+                            <div class="card-image">
+                            <img src="${response[i].hotel_image}">
+                            </div>
+                            <span class="card-title black-text">${response[i].hotel_name}</span>
+                            </div>
+                            <div class="card-content">
+                                Price - <span class="new badge">${response[i].hotel_price}</span>
+                                <p>${(response[i].hotel_description).substring(0, 250)}</p>
+                            </div>
+                        </div>
+                    
+                        
+                    `
+            }
+            show_hotels_here.innerHTML = html
+        })
+
+
+
+        }
+
+        getHotels()
+
+
+
+    </script>
+
+    
+</body>
+</html>
